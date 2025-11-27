@@ -1,39 +1,91 @@
 ﻿@page "/students"
-@rendermode InteractiveServer
 @using Microsoft.EntityFrameworkCore
-@using Microsoft.AspNetCore.Components.QuickGrid
 @using BlazorApp1.Models
 @using BlazorApp1.Data
-@implements IAsyncDisposable
 @inject IDbContextFactory<BlazorApp1.Data.BlazorApp1Context> DbFactory
+@inject NavigationManager NavigationManager
+@inject DialogService DialogService
+@inject NotificationService NotificationService
 
-<PageTitle>Index</PageTitle>
+<PageTitle>Students</PageTitle>
 
-<h1>Index</h1>
+<RadzenStack Gap="1rem">
+    <RadzenRow AlignItems="AlignItems.Center">
+        <RadzenColumn Size="12" SizeMD="6">
+            <RadzenText TextStyle="TextStyle.H3" TagName="TagName.H1">Students</RadzenText>
+        </RadzenColumn>
+        <RadzenColumn Size="12" SizeMD="6">
+            <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End" Gap="0.5rem">
+                <RadzenButton Icon="add_circle_outline" Text="Create New" ButtonStyle="ButtonStyle.Primary" Click="@(() => NavigationManager.NavigateTo("/students/create"))" />
+            </RadzenStack>
+        </RadzenColumn>
+    </RadzenRow>
 
-<p>
-    <a href="students/create">Create New</a>
-</p>
-
-<QuickGrid Class="table" Items="context.Student">
-    <PropertyColumn Property="student => student.Name" />
-    <PropertyColumn Property="student => student.Age" />
-    <PropertyColumn Property="student => student.BirthDate" Title = "Date of Birth" Format="dd/MM/yyyy"/>
-
-    <TemplateColumn Context="student">
-        <a href="@($"students/edit?id={student.Id}")">Edit</a> |
-        <a href="@($"students/details?id={student.Id}")">Details</a> |
-        <a href="@($"students/delete?id={student.Id}")">Delete</a>
-    </TemplateColumn>
-</QuickGrid>
+    <RadzenDataGrid Data="@students" TItem="Student" AllowFiltering="true" AllowPaging="true" PageSize="10" AllowSorting="true" class="rz-mt-4">
+        <Columns>
+            <RadzenDataGridColumn TItem="Student" Property="Name" Title="Name" />
+            <RadzenDataGridColumn TItem="Student" Property="Age" Title="Age" Width="100px" />
+            <RadzenDataGridColumn TItem="Student" Property="BirthDate" Title="Date of Birth" FormatString="{0:dd/MM/yyyy}" Width="150px" />
+            <RadzenDataGridColumn TItem="Student" Title="Actions" Width="250px" Sortable="false" Filterable="false">
+                <Template Context="student">
+                    <RadzenStack Orientation="Orientation.Horizontal" Gap="0.5rem">
+                        <RadzenButton Icon="edit" ButtonStyle="ButtonStyle.Light" Size="ButtonSize.Small"
+                                      Click="@(() => NavigationManager.NavigateTo($"/students/edit?id={student.Id}"))"
+                                      title="Edit" />
+                        <RadzenButton Icon="visibility" ButtonStyle="ButtonStyle.Info" Size="ButtonSize.Small"
+                                      Click="@(() => NavigationManager.NavigateTo($"/students/details?id={student.Id}"))"
+                                      title="Details" />
+                        <RadzenButton Icon="delete" ButtonStyle="ButtonStyle.Danger" Size="ButtonSize.Small"
+                                      Click="@(() => ConfirmDelete(student))"
+                                      title="Delete" />
+                    </RadzenStack>
+                </Template>
+            </RadzenDataGridColumn>
+        </Columns>
+    </RadzenDataGrid>
+</RadzenStack>
 
 @code {
-    private BlazorApp1Context context = default!;
+    private List<Student> students = new();
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
-        context = DbFactory.CreateDbContext();
+        await LoadStudents();
     }
 
-    public async ValueTask DisposeAsync() => await context.DisposeAsync();
+    private async Task LoadStudents()
+    {
+        using var context = DbFactory.CreateDbContext();
+        students = await context.Student.ToListAsync();
+    }
+
+    private async Task ConfirmDelete(Student student)
+    {
+        var result = await DialogService.Confirm(
+            $"Are you sure you want to delete {student.Name}?",
+            "Delete Student",
+            new ConfirmOptions() { OkButtonText = "Yes", CancelButtonText = "No" });
+
+        if (result == true)
+        {
+            await DeleteStudent(student);
+        }
+    }
+
+    private async Task DeleteStudent(Student student)
+    {
+        using var context = DbFactory.CreateDbContext();
+        context.Student.Remove(student);
+        await context.SaveChangesAsync();
+
+        NotificationService.Notify(new NotificationMessage
+        {
+            Severity = NotificationSeverity.Success,
+            Summary = "Success",
+            Detail = "Student deleted successfully",
+            Duration = 4000
+        });
+
+        await LoadStudents();
+    }
 }

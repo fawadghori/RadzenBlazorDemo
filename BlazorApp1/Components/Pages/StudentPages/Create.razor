@@ -1,55 +1,98 @@
 ﻿@page "/students/create"
-@rendermode InteractiveServer
 @using Microsoft.EntityFrameworkCore
 @using BlazorApp1.Models
 @inject IDbContextFactory<BlazorApp1.Data.BlazorApp1Context> DbFactory
 @inject NavigationManager NavigationManager
+@inject NotificationService NotificationService
 
-<PageTitle>Create</PageTitle>
+<PageTitle>Create Student</PageTitle>
 
-<h1>Create</h1>
+<RadzenStack Gap="1rem">
+    <RadzenText TextStyle="TextStyle.H3" TagName="TagName.H1">Create</RadzenText>
+    <RadzenText TextStyle="TextStyle.H4" TagName="TagName.H2">Student</RadzenText>
 
-<h2>Student</h2>
-<hr />
-<div class="row">
-    <div class="col-md-4">
-        <EditForm method="post" Model="Student" OnValidSubmit="AddStudent" FormName="create" Enhance>
+    <RadzenCard>
+        <EditForm Model="@Student" OnValidSubmit="@AddStudent" FormName="create">
             <DataAnnotationsValidator />
-            <ValidationSummary class="text-danger" role="alert"/>
-            <div class="mb-3">
-                <label for="name" class="form-label">Name:</label> 
-                <InputText id="name" @bind-Value="Student.Name" class="form-control" /> 
-                <ValidationMessage For="() => Student.Name" class="text-danger" /> 
-            </div>        
-            <div class="mb-3">
-                <label for="age" class="form-label">Age:</label> 
-                <InputNumber id="age" @bind-Value="Student.Age" class="form-control" /> 
-                <ValidationMessage For="() => Student.Age" class="text-danger" /> 
-            </div>        
-            <div class="mb-3">
-                <label for="birthdate" class="form-label">BirthDate:</label> 
-                <InputDate id="birthdate" @bind-Value="Student.BirthDate" class="form-control" /> 
-                <ValidationMessage For="() => Student.BirthDate" class="text-danger" /> 
-            </div>        
-            <button type="submit" class="btn btn-primary">Create</button>
-        </EditForm>
-    </div>
-</div>
+            <ValidationSummary />
 
-<div>
-    <a href="/students">Back to List</a>
-</div>
+            <RadzenStack Gap="1rem">
+                <RadzenRow>
+                    <RadzenColumn Size="12" SizeMD="6">
+                        <RadzenFormField Text="Name" Variant="Variant.Outlined">
+                            <ChildContent>
+                                <RadzenTextBox @bind-Value="Student.Name" Name="Name" Style="width: 100%;" />
+                            </ChildContent>
+                            <Helper>
+                                <RadzenRequiredValidator Component="Name" Text="Name is required" />
+                            </Helper>
+                        </RadzenFormField>
+                    </RadzenColumn>
+                </RadzenRow>
+
+                <RadzenRow>
+                    <RadzenColumn Size="12" SizeMD="6">
+                        <RadzenFormField Text="Age" Variant="Variant.Outlined">
+                            <ChildContent>
+                                <RadzenNumeric @bind-Value="Student.Age" Name="Age" Style="width: 100%;" />
+                            </ChildContent>
+                            <Helper>
+                                <RadzenRequiredValidator Component="Age" Text="Age is required" />
+                            </Helper>
+                        </RadzenFormField>
+                    </RadzenColumn>
+                </RadzenRow>
+
+                <RadzenRow>
+                    <RadzenColumn Size="12" SizeMD="6">
+                        <RadzenFormField Text="BirthDate" Variant="Variant.Outlined">
+                            <ChildContent>
+                                <RadzenDatePicker @bind-Value="Student.BirthDate" Name="BirthDate" DateFormat="dd/MM/yyyy" Style="width: 100%;" />
+                            </ChildContent>
+                            <Helper>
+                                <RadzenRequiredValidator Component="BirthDate" Text="BirthDate is required" />
+                            </Helper>
+                        </RadzenFormField>
+                    </RadzenColumn>
+                </RadzenRow>
+
+                <RadzenRow>
+                    <RadzenColumn>
+                        <RadzenStack Orientation="Orientation.Horizontal" Gap="0.5rem" class="rz-mt-4">
+                            <RadzenButton ButtonType="ButtonType.Submit" Icon="save" Text="Create" ButtonStyle="ButtonStyle.Primary" />
+                            <RadzenButton ButtonType="ButtonType.Button" Icon="cancel" Text="Back to List" ButtonStyle="ButtonStyle.Light"
+                                          Click="@BackToList" />
+                        </RadzenStack>
+                    </RadzenColumn>
+                </RadzenRow>
+            </RadzenStack>
+        </EditForm>
+    </RadzenCard>
+</RadzenStack>
 
 @code {
     [SupplyParameterFromForm]
     private Student Student { get; set; } = new();
 
-    // To protect from overposting attacks, see https://learn.microsoft.com/aspnet/core/blazor/forms/#mitigate-overposting-attacks.
     private async Task AddStudent()
     {
         using var context = DbFactory.CreateDbContext();
         context.Student.Add(Student);
         await context.SaveChangesAsync();
+
+        NotificationService.Notify(new NotificationMessage
+        {
+            Severity = NotificationSeverity.Success,
+            Summary = "Success",
+            Detail = "Student created successfully",
+            Duration = 4000
+        });
+
+        NavigationManager.NavigateTo("/students");
+    }
+
+    private void BackToList()
+    {
         NavigationManager.NavigateTo("/students");
     }
 }

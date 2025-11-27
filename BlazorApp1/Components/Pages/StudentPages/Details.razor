@@ -1,36 +1,61 @@
 ﻿@page "/students/details"
-@rendermode InteractiveServer
 @using Microsoft.EntityFrameworkCore
 @using BlazorApp1.Models
 @inject IDbContextFactory<BlazorApp1.Data.BlazorApp1Context> DbFactory
 @inject NavigationManager NavigationManager
 
-<PageTitle>Details</PageTitle>
+<PageTitle>Student Details</PageTitle>
 
-<h1>Details</h1>
+<RadzenStack Gap="1rem">
+    <RadzenText TextStyle="TextStyle.H3" TagName="TagName.H1">Details</RadzenText>
+    <RadzenText TextStyle="TextStyle.H4" TagName="TagName.H2">Student</RadzenText>
 
-<div>
-    <h2>Student</h2>
-    <hr />
     @if (student is null)
     {
-        <p><em>Loading...</em></p>
+        <RadzenProgressBarCircular ShowValue="false" Mode="ProgressBarMode.Indeterminate" />
+        <RadzenText>Loading...</RadzenText>
     }
-    else {
-        <dl class="row">
-            <dt class="col-sm-2">Name</dt>
-            <dd class="col-sm-10">@student.Name</dd>
-            <dt class="col-sm-2">Age</dt>
-            <dd class="col-sm-10">@student.Age</dd>
-            <dt class="col-sm-2">BirthDate</dt>
-            <dd class="col-sm-10">@student.BirthDate</dd>
-        </dl>
-        <div>
-            <a href="@($"/students/edit?id={student.Id}")">Edit</a> |
-            <a href="@($"/students")">Back to List</a>
-        </div>
+    else
+    {
+        <RadzenCard>
+            <RadzenStack Gap="1rem">
+                <RadzenRow>
+                    <RadzenColumn Size="12" SizeMD="3">
+                        <RadzenText TextStyle="TextStyle.Subtitle1" class="rz-font-weight-bold">Name</RadzenText>
+                    </RadzenColumn>
+                    <RadzenColumn Size="12" SizeMD="9">
+                        <RadzenText>@student.Name</RadzenText>
+                    </RadzenColumn>
+                </RadzenRow>
+
+                <RadzenRow>
+                    <RadzenColumn Size="12" SizeMD="3">
+                        <RadzenText TextStyle="TextStyle.Subtitle1" class="rz-font-weight-bold">Age</RadzenText>
+                    </RadzenColumn>
+                    <RadzenColumn Size="12" SizeMD="9">
+                        <RadzenText>@student.Age</RadzenText>
+                    </RadzenColumn>
+                </RadzenRow>
+
+                <RadzenRow>
+                    <RadzenColumn Size="12" SizeMD="3">
+                        <RadzenText TextStyle="TextStyle.Subtitle1" class="rz-font-weight-bold">BirthDate</RadzenText>
+                    </RadzenColumn>
+                    <RadzenColumn Size="12" SizeMD="9">
+                        <RadzenText>FormatDate(@student.BirthDate)</RadzenText>
+                    </RadzenColumn>
+                </RadzenRow>
+            </RadzenStack>
+        </RadzenCard>
+
+        <RadzenStack Orientation="Orientation.Horizontal" Gap="0.5rem" class="rz-mt-4">
+            <RadzenButton Icon="edit" Text="Edit" ButtonStyle="ButtonStyle.Primary"
+                          Click="@(() => NavigationManager.NavigateTo($"/students/edit?id={student.Id}"))" />
+            <RadzenButton Icon="arrow_back" Text="Back to List" ButtonStyle="ButtonStyle.Light"
+                          Click="@(() => NavigationManager.NavigateTo("/students"))" />
+        </RadzenStack>
     }
-</div>
+</RadzenStack>
 
 @code {
     private Student? student;
@@ -47,5 +72,10 @@
         {
             NavigationManager.NavigateTo("notfound");
         }
+    }
+
+    private string FormatDate(DateOnly date)
+    {
+        return $"{date.Day:D2}/{date.Month:D2}/{date.Year}";
     }
 }

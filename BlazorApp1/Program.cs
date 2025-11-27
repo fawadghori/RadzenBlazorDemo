@@ -1,7 +1,8 @@
 using BlazorApp1.Components;
+using BlazorApp1.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using BlazorApp1.Data;
+using Radzen;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContextFactory<BlazorApp1Context>(options =>
@@ -14,6 +15,9 @@ builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 // Add services to the container.
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
+
+// Add Radzen services
+builder.Services.AddRadzenComponents();
 
 var app = builder.Build();
 
