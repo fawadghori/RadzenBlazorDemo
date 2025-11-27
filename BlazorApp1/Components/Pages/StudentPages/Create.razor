@@ -15,18 +15,14 @@
     <RadzenCard>
         <EditForm Model="@Student" OnValidSubmit="@AddStudent" FormName="create">
             <DataAnnotationsValidator />
-            <ValidationSummary />
+            <ValidationSummary class="text-danger" />
 
             <RadzenStack Gap="1rem">
                 <RadzenRow>
                     <RadzenColumn Size="12" SizeMD="6">
                         <RadzenFormField Text="Name" Variant="Variant.Outlined">
-                            <ChildContent>
-                                <RadzenTextBox @bind-Value="Student.Name" Name="Name" Style="width: 100%;" />
-                            </ChildContent>
-                            <Helper>
-                                <RadzenRequiredValidator Component="Name" Text="Name is required" />
-                            </Helper>
+                            <RadzenTextBox @bind-Value="Student.Name" Name="Name" Style="width: 100%;" />
+                            <ValidationMessage For="@(() => Student.Name)" class="text-danger" />
                         </RadzenFormField>
                     </RadzenColumn>
                 </RadzenRow>
@@ -34,12 +30,8 @@
                 <RadzenRow>
                     <RadzenColumn Size="12" SizeMD="6">
                         <RadzenFormField Text="Age" Variant="Variant.Outlined">
-                            <ChildContent>
-                                <RadzenNumeric @bind-Value="Student.Age" Name="Age" Style="width: 100%;" />
-                            </ChildContent>
-                            <Helper>
-                                <RadzenRequiredValidator Component="Age" Text="Age is required" />
-                            </Helper>
+                            <RadzenNumeric @bind-Value="Student.Age" Name="Age" Style="width: 100%;" />
+                            <ValidationMessage For="@(() => Student.Age)" class="text-danger" />
                         </RadzenFormField>
                     </RadzenColumn>
                 </RadzenRow>
@@ -47,12 +39,8 @@
                 <RadzenRow>
                     <RadzenColumn Size="12" SizeMD="6">
                         <RadzenFormField Text="BirthDate" Variant="Variant.Outlined">
-                            <ChildContent>
-                                <RadzenDatePicker @bind-Value="Student.BirthDate" Name="BirthDate" DateFormat="dd/MM/yyyy" Style="width: 100%;" />
-                            </ChildContent>
-                            <Helper>
-                                <RadzenRequiredValidator Component="BirthDate" Text="BirthDate is required" />
-                            </Helper>
+                            <RadzenDatePicker @bind-Value="Student.BirthDate" Name="BirthDate" DateFormat="dd/MM/yyyy" Style="width: 100%;" />
+                            <ValidationMessage For="@(() => Student.BirthDate)" class="text-danger" />
                         </RadzenFormField>
                     </RadzenColumn>
                 </RadzenRow>
